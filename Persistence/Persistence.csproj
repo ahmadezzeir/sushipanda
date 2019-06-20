@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Migrations\20190617140259_Initial.cs" />
+    <Compile Remove="Migrations\20190617140259_Initial.Designer.cs" />
+    <Compile Remove="Migrations\20190618100912_UserAdded.cs" />
+    <Compile Remove="Migrations\20190618100912_UserAdded.Designer.cs" />
+    <Compile Remove="Migrations\20190618101003_Initial.cs" />
+    <Compile Remove="Migrations\20190618101003_Initial.Designer.cs" />
+    <Compile Remove="Migrations\20190618103633_Initial.cs" />
+    <Compile Remove="Migrations\20190618103633_Initial.Designer.cs" />
+    <Compile Remove="Migrations\20190618123411_Initial.cs" />
+    <Compile Remove="Migrations\20190618123411_Initial.Designer.cs" />
+    <Compile Remove="Migrations\20190618143236_Initial.cs" />
+    <Compile Remove="Migrations\20190618143236_Initial.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.2.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.4" />
+    <PackageReference Include="StackExchange.Redis" Version="2.0.601" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Domain\Domain.csproj" />
+  </ItemGroup>
+
+</Project>
