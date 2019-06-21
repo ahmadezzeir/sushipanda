@@ -62,7 +62,7 @@ namespace Repositories
             await _redisContext.AddCommandAsync(async () =>
             {
                 dynamic obj = new ExpandoObject();
-                var properties = entity.GetType().GetProperties().Where(x => x.Name != "Id");
+                var properties = entity.GetType().GetProperties().Where(x => x.Name != nameof(entity.Id));
                 foreach (var prop in properties)
                 {
                     AddProperty(obj, prop.Name, prop.GetValue(entity));
