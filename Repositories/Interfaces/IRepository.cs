@@ -30,6 +30,6 @@ namespace Repositories.Interfaces
 
         void Update(TModel entity);
 
-        void Remove(TModel entity);
+        Task Remove(Guid id);
     }
 }

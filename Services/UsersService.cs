@@ -1,19 +1,20 @@
 ﻿using System.Threading.Tasks;
+using Autofac;
 using AutoMapper;
 using Domain.Models;
 using Microsoft.AspNetCore.Identity;
-using Repositories.Interfaces;
+using Services.Abstractions;
 using Services.Dtos;
 using Services.Interfaces;
 
 namespace Services
 {
-    public class UsersService : ServiceBase, IUsersService
+    public class UsersService : ServiceBaseSql, IUsersService
     {
         private readonly UserManager<User> _userManager;
 
-        public UsersService(IMapper mapper, IUnitOfWork unitOfWork, UserManager<User> userManager)
-            : base(mapper, unitOfWork)
+        public UsersService(IMapper mapper, IComponentContext scope, UserManager<User> userManager)
+            : base(mapper, scope)
         {
             _userManager = userManager;
         }

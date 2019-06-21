@@ -1,21 +1,22 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Autofac;
 using Domain.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Repositories.Interfaces;
 
-namespace Repositories
+namespace Services.Identity
 {
     public class UserStore : IUserPasswordStore<User>, IUserEmailStore<User>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IRepository<User> _usersRepository;
 
-        public UserStore(IUnitOfWork unitOfWork)
+        public UserStore(IComponentContext context)
         {
-            _unitOfWork = unitOfWork;
+            _unitOfWork = context.ResolveKeyed<IUnitOfWork>("sql");
             _usersRepository = _unitOfWork.Repository<User>();
         }
 
@@ -29,7 +30,7 @@ namespace Repositories
 
         public async Task<IdentityResult> DeleteAsync(User user, CancellationToken cancellationToken)
         {
-            _usersRepository.Remove(user);
+            await _usersRepository.Remove(user.Id);
             await _unitOfWork.CommitAsync();
 
             return await Task.FromResult(IdentityResult.Success);

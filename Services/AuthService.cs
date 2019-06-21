@@ -1,20 +1,21 @@
 ﻿using System.Security.Authentication;
 using System.Threading.Tasks;
+using Autofac;
 using AutoMapper;
 using Domain.Models;
 using Microsoft.AspNetCore.Identity;
-using Repositories.Interfaces;
+using Services.Abstractions;
 using Services.Dtos;
 using Services.Interfaces;
 
 namespace Services
 {
-    public class AuthService : ServiceBase, IAuthService
+    public class AuthService : ServiceBaseSql, IAuthService
     {
         private readonly UserManager<User> _userManager;
 
-        public AuthService(IMapper mapper, IUnitOfWork unitOfWork, UserManager<User> userManager) 
-            : base(mapper, unitOfWork)
+        public AuthService(IMapper mapper, IComponentContext context, UserManager<User> userManager) 
+            : base(mapper, context)
         {
             _userManager = userManager;
         }

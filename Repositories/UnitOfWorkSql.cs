@@ -8,13 +8,13 @@ using Repositories.Interfaces;
 
 namespace Repositories
 {
-    public class UnitOfWork : IUnitOfWork
+    public class UnitOfWorkSql : IUnitOfWork
     {
         private readonly DbContext _dbContext;
         private readonly Dictionary<Type, object> _repositories = new Dictionary<Type, object>();
         private bool _disposed;
 
-        public UnitOfWork(DbContext dbContext)
+        public UnitOfWorkSql(DbContext dbContext)
         {
             _dbContext = dbContext;
         }
@@ -26,7 +26,7 @@ namespace Repositories
                 return _repositories[typeof(T)] as IRepository<T>;
             }
 
-            IRepository<T> repo = new SqlRepository<T>(_dbContext);
+            IRepository<T> repo = new RepositorySql<T>(_dbContext);
             _repositories.Add(typeof(T), repo);
 
             return repo;

@@ -11,11 +11,11 @@ using Repositories.Interfaces;
 
 namespace Repositories
 {
-    public class SqlRepository<TModel> : IRepository<TModel> where TModel : EntityBase
+    public class RepositorySql<TModel> : IRepository<TModel> where TModel : EntityBase
     {
         private readonly DbSet<TModel> _dbSet;
 
-        public SqlRepository(DbContext context)
+        public RepositorySql(DbContext context)
         {
             _dbSet = context.Set<TModel>();
         }
@@ -100,8 +100,9 @@ namespace Repositories
             _dbSet.Update(entity);
         }
 
-        public void Remove(TModel entity)
+        public async Task Remove(Guid id)
         {
+            var entity = await _dbSet.FindAsync(id);
             _dbSet.Remove(entity);
         }
     }

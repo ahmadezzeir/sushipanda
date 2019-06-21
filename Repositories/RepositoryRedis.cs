@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -13,12 +14,14 @@ using Newtonsoft.Json;
 
 namespace Repositories
 {
-    public class RedisRepository<T> : IRepository<T> where T : EntityBase
+    public class RepositoryRedis<T> : IRepository<T> where T : EntityBase
     {
         private readonly IDatabase _db;
+        private readonly RedisDbContext _redisContext;
 
-        public RedisRepository(RedisDbContext redisContext)
+        public RepositoryRedis(RedisDbContext redisContext)
         {
+            _redisContext = redisContext;
             _db = redisContext.Database;
         }
 
@@ -56,7 +59,19 @@ namespace Repositories
 
         public async Task AddAsync(T entity)
         {
-            throw new NotImplementedException();
+            await _redisContext.AddCommandAsync(async () =>
+            {
+                dynamic obj = new ExpandoObject();
+                var properties = entity.GetType().GetProperties().Where(x => x.Name != "Id");
+                foreach (var prop in properties)
+                {
+                    AddProperty(obj, prop.Name, prop.GetValue(entity));
+                }
+
+                var jsonObj = JsonConvert.SerializeObject(obj);
+
+                await _db.StringSetAsync(entity.Id.ToString(), jsonObj);
+            });
         }
 
         public void Update(T entity)
@@ -64,9 +79,21 @@ namespace Repositories
             throw new NotImplementedException();
         }
 
-        public void Remove(T entity)
+        public async Task Remove(Guid id)
         {
-            throw new NotImplementedException();
+            await _redisContext.AddCommandAsync(async () =>
+            {
+                await _db.KeyDeleteAsync(id.ToString());
+            });
+        }
+
+        public static void AddProperty(ExpandoObject expando, string propertyName, object propertyValue)
+        {
+            var expandoDict = expando as IDictionary<string, object>;
+            if (expandoDict.ContainsKey(propertyName))
+                expandoDict[propertyName] = propertyValue;
+            else
+                expandoDict.Add(propertyName, propertyValue);
         }
     }
 }

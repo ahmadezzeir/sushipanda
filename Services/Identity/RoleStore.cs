@@ -1,21 +1,22 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Autofac;
 using Domain;
 using Microsoft.AspNetCore.Identity;
 using Repositories.Interfaces;
 
-namespace Repositories
+namespace Services.Identity
 {
     public class RoleStore : IRoleStore<Role>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IRepository<Role> _rolesRepository;
 
-        public RoleStore(IUnitOfWork unitOfWork, IRepository<Role> rolesRepository)
+        public RoleStore(IComponentContext context)
         {
-            _unitOfWork = unitOfWork;
-            _rolesRepository = rolesRepository;
+            _unitOfWork = context.ResolveKeyed<IUnitOfWork>("sql");
+            _rolesRepository = _unitOfWork.Repository<Role>();
         }
 
         public async Task<IdentityResult> CreateAsync(Role role, CancellationToken cancellationToken)
@@ -28,7 +29,7 @@ namespace Repositories
 
         public async Task<IdentityResult> DeleteAsync(Role role, CancellationToken cancellationToken)
         {
-            _rolesRepository.Remove(role);
+            await _rolesRepository.Remove(role.Id);
             await _unitOfWork.CommitAsync();
 
             return await Task.FromResult(IdentityResult.Success);

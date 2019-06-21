@@ -23,6 +23,7 @@ using Persistence;
 using Repositories;
 using Repositories.Interfaces;
 using Services;
+using Services.Identity;
 using Services.Interfaces;
 using Services.MappingProfiles;
 using Services.Validators;
@@ -51,8 +52,7 @@ namespace API
             });
 
             services.AddTransient<DbContext, ApplicationDbContext>();
-
-            services.AddTransient<IUnitOfWork, UnitOfWork>();
+            services.AddTransient<RedisDbContext, RedisDbContext>();
 
             services.AddAutoMapper(typeof(UserMappingProfile).Assembly);
 
@@ -82,12 +82,20 @@ namespace API
                 .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<UserDtoValidator>())
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
+            return ConfigureAutofac(services);
+        }
+
+        public IServiceProvider ConfigureAutofac(IServiceCollection services)
+        {
             var builder = new ContainerBuilder();
             builder.Populate(services);
 
-            builder.RegisterType(typeof(SqlRepository<>)).Named("sql", typeof(IRepository<>)).InstancePerDependency();
-            builder.RegisterType(typeof(RedisRepository<>)).Named("redis", typeof(IRepository<>)).InstancePerDependency();
-            
+            builder.RegisterGeneric(typeof(RepositorySql<>)).Named("sql", typeof(IRepository<>)).InstancePerDependency();
+            builder.RegisterGeneric(typeof(RepositoryRedis<>)).Named("redis", typeof(IRepository<>)).InstancePerDependency();
+
+            builder.RegisterType<UnitOfWorkSql>().Keyed<IUnitOfWork>("sql").InstancePerDependency();
+            builder.RegisterType<UnitOfWorkRedis>().Keyed<IUnitOfWork>("redis").InstancePerDependency();
+
             var container = builder.Build();
             return container.Resolve<IServiceProvider>();
         }

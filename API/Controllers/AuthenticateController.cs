@@ -5,11 +5,8 @@ using Services.Dtos;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
-using Domain.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Repositories.Interfaces;
-using Services;
 using Services.Interfaces;
 
 namespace API.Controllers
@@ -34,7 +31,7 @@ namespace API.Controllers
         public async Task<IActionResult> Post(LoginDto loginDto)
         {
             var userDto = await _authService.LoginAsync(loginDto);
-            var result = CreateJwtToken(userDto);
+            var result = await CreateJwtTokenAsync(userDto);
 
             return Ok(result);
         }
@@ -47,18 +44,22 @@ namespace API.Controllers
             var userId = encryptedToken.Claims.First(x => x.Type == JwtRegisteredClaimNames.Sub).Value;
             var token = await _refreshTokenService.GetRefreshTokenByIdAsync(userId);
 
-            if (refreshToken == token)
+            if (refreshToken == token.Value)
             {
                 var userDto = await _authService.GetUserInfoAsync(userId);
-                var result = CreateJwtToken(userDto);
 
-                return Ok(result);
+                if (userDto != null)
+                {
+                    var result = await CreateJwtTokenAsync(userDto);
+
+                    return Ok(result);
+                }
             }
 
             return Ok();
         }
 
-        private AuthenticationResultDto CreateJwtToken(LoggedInUserDto userDto) 
+        private async Task<AuthenticationResultDto> CreateJwtTokenAsync(LoggedInUserDto userDto)
         {
             var utcUnixTimeString = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
             var expUnitTime = DateTimeOffset.UtcNow.AddMinutes(1).ToUnixTimeSeconds();
@@ -83,11 +84,22 @@ namespace API.Controllers
 
             var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
 
+            await _refreshTokenService.DeleteRefreshTokenAsync(userDto.Id);
+
+            var refreshTokenDto = new RefreshTokenDto
+            {
+                Id = userDto.Id,
+                Expiration = DateTime.UtcNow.AddDays(30),
+                Value = Guid.NewGuid().ToString()
+            };
+
+            await _refreshTokenService.CreateRefreshTokenAsync(refreshTokenDto);
+
             return new AuthenticationResultDto
             {
                 AccessToken = accessToken,
                 Expiration = expUnitTime,
-                //RefreshToken = refreshToken
+                RefreshToken = refreshTokenDto.Value
             };
         }
     }
