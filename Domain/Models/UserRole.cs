@@ -1,6 +1,4 @@
-﻿using Domain.Models;
-
-namespace Domain
+﻿namespace Domain.Models
 {
     public class UserRole
     {

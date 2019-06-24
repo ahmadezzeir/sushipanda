@@ -12,6 +12,7 @@ namespace API
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>();
+                .UseStartup<Startup>()
+                .UseSentry("https://1c371401f8c845a7aba995ca52a33465@sentry.io/1488632");
     }
 }

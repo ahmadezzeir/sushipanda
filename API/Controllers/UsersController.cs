@@ -1,6 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Sentry;
 using Services.Dtos;
 using Services.Interfaces;
 
@@ -34,6 +37,16 @@ namespace API.Controllers
         public async Task<IActionResult> ForgotPassword(string email)
         {
             await _usersService.ForgotPassword(email);
+            return Ok();
+        }
+
+        // Example for exception catch with sentry.io
+        [HttpGet]
+        [Route("exception")]
+        public async Task<IActionResult> Put()
+        {
+            throw null;
+
             return Ok();
         }
 

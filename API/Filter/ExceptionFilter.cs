@@ -3,6 +3,7 @@ using System.Security.Authentication;
 using System.Text;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Newtonsoft.Json;
+using Sentry;
 
 namespace API.Filter
 {
@@ -24,6 +25,8 @@ namespace API.Filter
                 context.HttpContext.Response.Body.WriteAsync(messageBytes);
                 context.ExceptionHandled = true;
             }
+
+            SentrySdk.CaptureException(context.Exception);
         }
     }
 }
