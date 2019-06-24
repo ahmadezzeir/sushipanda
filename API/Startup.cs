@@ -75,6 +75,8 @@ namespace API
                 options.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
             });
 
+            services.AddCors();
+
             services.AddMvc(options =>
                 {
                     options.Filters.Add(typeof(ExceptionFilter));
@@ -110,6 +112,10 @@ namespace API
             {
                 app.UseHsts();
             }
+
+            app.UseCors(
+                options => options.WithOrigins("http://localhost:3000").AllowAnyMethod().AllowAnyHeader()
+            );
 
             app.UseOpenApi();
             app.UseSwaggerUi3();
