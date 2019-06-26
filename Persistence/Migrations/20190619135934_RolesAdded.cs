@@ -11,9 +11,9 @@ namespace Persistence.Migrations
                 name: "Role",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: false),
-                    NormalizedName = table.Column<string>(nullable: false)
+                    Id = table.Column<Guid>(),
+                    Name = table.Column<string>(),
+                    NormalizedName = table.Column<string>()
                 },
                 constraints: table =>
                 {
@@ -24,8 +24,8 @@ namespace Persistence.Migrations
                 name: "UserRole",
                 columns: table => new
                 {
-                    UserId = table.Column<Guid>(nullable: false),
-                    RoleId = table.Column<Guid>(nullable: false)
+                    UserId = table.Column<Guid>(),
+                    RoleId = table.Column<Guid>()
                 },
                 constraints: table =>
                 {

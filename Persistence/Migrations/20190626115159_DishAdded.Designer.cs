@@ -4,13 +4,15 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190626115159_DishAdded")]
+    partial class DishAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

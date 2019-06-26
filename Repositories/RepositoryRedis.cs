@@ -6,11 +6,11 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Domain.Models;
 using Microsoft.EntityFrameworkCore.Query;
-using StackExchange.Redis;
+using Newtonsoft.Json;
 using Persistence;
 using Repositories.Extensions;
 using Repositories.Interfaces;
-using Newtonsoft.Json;
+using StackExchange.Redis;
 
 namespace Repositories
 {

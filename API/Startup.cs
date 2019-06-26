@@ -62,6 +62,8 @@ namespace API
             services.AddTransient<IAuthService, AuthService>();
             services.AddTransient<IRefreshTokenService, RefreshTokenService>();
 
+            services.AddTransient<IDishesService, DishesService>();
+
             services.AddSwaggerDocument(options =>
             {
                 options.AddSecurity("JWT", Enumerable.Empty<string>(), new OpenApiSecurityScheme
