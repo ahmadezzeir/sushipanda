@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Dtos;
 using Services.Interfaces;
@@ -44,6 +45,15 @@ namespace API.Controllers
         {
             throw null;
 
+            return Ok();
+        }
+
+        [HttpPost]
+        [Route("change-email")]
+        [Authorize]
+        public async Task<IActionResult> ChangeEmail(ChangeEmailDto dto)
+        {
+            await _usersService.ChangeEmailAsync(dto);
             return Ok();
         }
 

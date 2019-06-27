@@ -9,5 +9,7 @@ namespace Services.Interfaces
         Task<IdentityResult> CreateUserAsync(UserCreationDto userCreationDto);
 
         Task ForgotPassword(string email);
+
+        Task ChangeEmailAsync(ChangeEmailDto dto);
     }
 }
