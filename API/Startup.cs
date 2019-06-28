@@ -7,7 +7,9 @@ using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
 using Domain.Models;
 using Domain.Options;
+using Emails;
 using FluentValidation.AspNetCore;
+using Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -53,6 +55,11 @@ namespace API
 
             services.AddTransient<DbContext, ApplicationDbContext>();
             services.AddTransient<RedisDbContext, RedisDbContext>();
+
+            services.AddTransient<IMailSenderService, MailSenderService>();
+            services.Configure<SmtpConfiguration>(Configuration.GetSection("Smtp"));
+            services.AddSingleton<SmtpConfiguration>();
+            services.AddTransient<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
 
             services.AddAutoMapper(typeof(UserMappingProfile).Assembly);
 

@@ -38,14 +38,20 @@ namespace API.Controllers
             return Ok();
         }
 
+        [HttpPut]
+        [Route("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail(string token)
+        {
+            await _usersService.ConfirmEmailAsync(token);
+            return Ok();
+        }
+
         // Example for exception catch with sentry.io
         [HttpGet]
         [Route("exception")]
-        public async Task<IActionResult> Put()
+        public IActionResult Put()
         {
             throw null;
-
-            return Ok();
         }
 
         [HttpPost]

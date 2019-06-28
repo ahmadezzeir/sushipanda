@@ -18,6 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Emails\Emails.csproj" />
+    <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
     <ProjectReference Include="..\Persistence\Persistence.csproj" />
     <ProjectReference Include="..\Repositories\Repositories.csproj" />
     <ProjectReference Include="..\Services\Services.csproj" />

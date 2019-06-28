@@ -11,5 +11,7 @@ namespace Services.Interfaces
         Task ForgotPassword(string email);
 
         Task ChangeEmailAsync(ChangeEmailDto dto);
+
+        Task ConfirmEmailAsync(string token);
     }
 }
