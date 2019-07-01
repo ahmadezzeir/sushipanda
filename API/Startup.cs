@@ -165,10 +165,10 @@ namespace API
             services.AddScoped<IUserStore<User>, UserStore>();
 
             services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
                 .AddJwtBearer(options =>
                 {
                     options.RequireHttpsMetadata = false;
@@ -183,12 +183,13 @@ namespace API
                         ValidateIssuerSigningKey = true,
                         ClockSkew = TimeSpan.Zero
                     };
-                })
-                .AddGoogle(options =>
-                {
-                    options.ClientId = Configuration["Auth:Google:ClientId"];
-                    options.ClientSecret = Configuration["Auth:Google:ClientSecret"];
                 });
+                //.AddGoogle(options =>
+                //{
+                //    options.ClientId = Configuration["Auth:Google:ClientId"];
+                //    options.ClientSecret = Configuration["Auth:Google:ClientSecret"];
+                //    options.SignInScheme = IdentityConstants.ExternalScheme;
+                //});
 
             services.AddAuthorization();
         }
