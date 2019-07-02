@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text;
 using API.Filter;
+using API.Options;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using AutoMapper;
@@ -153,13 +154,20 @@ namespace API
             });
 
             var sKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration["JwtOptions:SecretKey"]));
-            services.Configure<JwtOptions>(opt =>
+            services.Configure<JwtOptions>(options =>
             {
-                opt.Issuer = Configuration["JwtOptions:Issuer"];
-                opt.Audience = Configuration["JwtOptions:Audience"];
-                opt.SigningCredentials = sKey;
+                options.Issuer = Configuration["JwtOptions:Issuer"];
+                options.Audience = Configuration["JwtOptions:Audience"];
+                options.SigningCredentials = sKey;
             });
             services.AddSingleton<JwtOptions>();
+
+            services.Configure<GoogleAuthOptions>(options =>
+            {
+                options.ClientId = Configuration["Auth:Google:ClientId"];
+                options.ClientSecret = Configuration["Auth:Google:ClientSecret"];
+            });
+            services.AddSingleton<GoogleAuthOptions>();
 
             services.AddIdentityCore<User>().AddDefaultTokenProviders();
             services.AddScoped<IUserStore<User>, UserStore>();
@@ -184,12 +192,6 @@ namespace API
                         ClockSkew = TimeSpan.Zero
                     };
                 });
-                //.AddGoogle(options =>
-                //{
-                //    options.ClientId = Configuration["Auth:Google:ClientId"];
-                //    options.ClientSecret = Configuration["Auth:Google:ClientSecret"];
-                //    options.SignInScheme = IdentityConstants.ExternalScheme;
-                //});
 
             services.AddAuthorization();
         }
