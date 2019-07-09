@@ -22,7 +22,7 @@ namespace Services
 
         public async Task<LoggedInUserDto> LoginAsync(LoginDto loginDto)
         {
-            var user = await _userManager.FindByNameAsync(loginDto.Username);
+            var user = await _userManager.FindByEmailAsync(loginDto.Email);
 
             if (user != null && await _userManager.CheckPasswordAsync(user, loginDto.Password))
             {

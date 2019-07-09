@@ -7,6 +7,11 @@
 <body>
     <h2>Hi @Model.Username,</h2>
     <br />
+    @if (!string.IsNullOrEmpty(Model.Password))
+    {
+        <p>Your password is: @(Model.Password). Please change him as soon as you can.!!!</p>
+        <br />
+    }
     <span>To complete your sign up, please verify your email: </span>
     <br />
     <a href="http://localhost:44346/api/users/confirm-email?token=@Model.Token" target="_blank" style="background-color:#01b3e3; border-collapse:separate !important; border-top:10px solid #01b3e3; border-bottom:10px solid #01b3e3; border-right:45px solid #01b3e3; border-left:45px solid #01b3e3; border-radius:4px; color:#ffffff; display:inline-block; font-family:'Open+Sans','Open Sans',Helvetica, Arial, sans-serif; font-size:13px; font-weight:bold; text-align:center; text-decoration:none; letter-spacing:2px;">VERIFY EMAIL</a>

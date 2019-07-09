@@ -7,6 +7,7 @@ using Emails.ViewModels;
 using Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.Internal;
 using Services.Abstractions;
 using Services.Dtos;
 using Services.Interfaces;
@@ -35,19 +36,23 @@ namespace Services
             var user = Mapper.Map<User>(userCreationDto);
             var identityResult = await _userManager.CreateAsync(user, userCreationDto.Password);
 
-            var emailView = new ConfirmMailboxEmailViewModel
+            if (!identityResult.Errors.Any())
             {
-                Token = await _userManager.GenerateEmailConfirmationTokenAsync(user),
-                Username = user.Name
-            };
-            var message = new MailMessage
-            {
-                BodyHtml = await _razorViewToStringRenderer.RenderViewToStringAsync("ConfirmMailboxEmailView", emailView),
-                From = "admin@example.com",
-                To = user.Email,
-                Subject = "Thank you for registration"
-            };
-            await _mailSenderService.SendEmailAsync(message);
+                var emailView = new ConfirmMailboxEmailViewModel
+                {
+                    Token = await _userManager.GenerateEmailConfirmationTokenAsync(user),
+                    Username = user.Name,
+                    Password = userCreationDto.Password
+                };
+                var message = new MailMessage
+                {
+                    BodyHtml = await _razorViewToStringRenderer.RenderViewToStringAsync("ConfirmMailboxEmailView", emailView),
+                    From = "admin@example.com",
+                    To = user.Email,
+                    Subject = "Thank you for your registration"
+                };
+                await _mailSenderService.SendEmailAsync(message);
+            }
 
             return identityResult;
         }

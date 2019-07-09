@@ -24,15 +24,19 @@ namespace API.Controllers
     public class AuthenticateController : Controller
     {
         private readonly IAuthService _authService;
+        private readonly IRefreshTokenService _refreshTokenService;
+        private readonly IUsersService _usersService;
+
         private readonly JwtOptions _jwtOptions;
         private readonly GoogleAuthOptions _googleAuthOptions;
-        private readonly IRefreshTokenService _refreshTokenService;
 
-        public AuthenticateController(IAuthService authService, IOptions<JwtOptions> jwtOptions,
-            IOptions<GoogleAuthOptions> googleAuthOptions, IRefreshTokenService refreshTokenService)
+        public AuthenticateController(IAuthService authService, IRefreshTokenService refreshTokenService, IUsersService usersService,
+            IOptions<JwtOptions> jwtOptions, IOptions<GoogleAuthOptions> googleAuthOptions)
         {
             _authService = authService;
             _refreshTokenService = refreshTokenService;
+            _usersService = usersService;
+
             _jwtOptions = jwtOptions.Value;
             _googleAuthOptions = googleAuthOptions.Value;
         }
@@ -97,7 +101,13 @@ namespace API.Controllers
             var userInfoService = new Oauth2Service(initializer);
             var userInfo = await userInfoService.Userinfo.Get().ExecuteAsync();
 
-            // code to create user and etc.
+            await _usersService.CreateUserAsync(new UserCreationDto
+            {
+                Email = userInfo.Email,
+                Password = "123456",  //TODO: Add password generator
+                IsFromExternalService = true,
+                Name = userInfo.Email
+            });
 
             return Ok();
         }
@@ -113,7 +123,7 @@ namespace API.Controllers
             claimsIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.Exp, expUnitTime.ToString()));
             claimsIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.Nbf, utcUnixTimeString));
             claimsIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.Iat, utcUnixTimeString));
-            //identity.AddClaim(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));  
+            //claimsIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));  
             claimsIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.UniqueName, userDto.Name));
             claimsIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.Email, userDto.Email));
             claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, userDto.Roles.First()));
