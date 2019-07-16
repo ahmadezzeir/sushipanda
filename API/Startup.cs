@@ -10,7 +10,16 @@ using Domain.Models;
 using Domain.Options;
 using Emails;
 using FluentValidation.AspNetCore;
+using Hangfire;
+using Hangfire.Dashboard;
+using Hangfire.SqlServer;
 using Infrastructure;
+using Infrastructure.EventHandling;
+using Infrastructure.EventHandling.Interfaces;
+using Infrastructure.Events;
+using Infrastructure.Events.Models;
+using Infrastructure.Notifications;
+using Infrastructure.SmtpMailing;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -44,33 +53,17 @@ namespace API
 
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
-            {
-                options.UseSqlServer(Configuration.GetConnectionString("Mssql"));
-            });
+            DatabasesConfiguration(services);
 
-            services.Configure<RedisOptions>(options =>
-            {
-                options.ConnectionString = Configuration.GetConnectionString("Redis");
-            });
+            MailingConfiguration(services);
 
-            services.AddTransient<DbContext, ApplicationDbContext>();
-            services.AddTransient<RedisDbContext, RedisDbContext>();
+            EventsConfigurations(services);
 
-            services.AddTransient<IMailSenderService, MailSenderService>();
-            services.Configure<SmtpConfiguration>(Configuration.GetSection("Smtp"));
-            services.AddSingleton<SmtpConfiguration>();
-            services.AddTransient<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
+            UserManagementAndAuthConfigurations(services);
+
+            ProjectServicesConfiguration(services);
 
             services.AddAutoMapper(typeof(UserMappingProfile).Assembly);
-
-            UserManagementAndAuth(services);
-
-            services.AddTransient<IUsersService, UsersService>();
-            services.AddTransient<IAuthService, AuthService>();
-            services.AddTransient<IRefreshTokenService, RefreshTokenService>();
-
-            services.AddTransient<IDishesService, DishesService>();
 
             services.AddSwaggerDocument(options =>
             {
@@ -85,8 +78,22 @@ namespace API
                 options.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
             });
 
-            services.AddCors();
+            services.AddHangfire(configuration => configuration
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseSqlServerStorage(Configuration.GetConnectionString("Hangfire"), new SqlServerStorageOptions
+                {
+                    CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                    SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                    QueuePollInterval = TimeSpan.Zero,
+                    UseRecommendedIsolationLevel = true,
+                    UsePageLocksOnDequeue = true,
+                    DisableGlobalLocks = true
+                }));
+            services.AddHangfireServer();
 
+            services.AddCors();
             services.AddMvc(options =>
                 {
                     options.Filters.Add(typeof(ExceptionFilter));
@@ -95,6 +102,23 @@ namespace API
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             return ConfigureAutofac(services);
+        }
+
+        private static void ProjectServicesConfiguration(IServiceCollection services)
+        {
+            services.AddTransient<IUsersService, UsersService>();
+            services.AddTransient<IAuthService, AuthService>();
+            services.AddTransient<IRefreshTokenService, RefreshTokenService>();
+
+            services.AddTransient<IDishesService, DishesService>();
+        }
+
+        private void MailingConfiguration(IServiceCollection services)
+        {
+            services.AddTransient<IMailSenderService, MailSenderService>();
+            services.Configure<SmtpConfiguration>(Configuration.GetSection("Smtp"));
+            services.AddSingleton<SmtpConfiguration>();
+            services.AddTransient<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
         }
 
         public IServiceProvider ConfigureAutofac(IServiceCollection services)
@@ -123,20 +147,52 @@ namespace API
                 app.UseHsts();
             }
 
-            app.UseCors(
-                options => options.WithOrigins("http://localhost:3000").AllowAnyMethod().AllowAnyHeader()
-            );
+            app.UseHttpsRedirection();
+            app.UseCors(options => options.WithOrigins("http://localhost:3000").AllowAnyMethod().AllowAnyHeader());
+
+            app.UseAuthentication();
 
             app.UseOpenApi();
             app.UseSwaggerUi3();
 
-            app.UseAuthentication();
+            var hangfireOptions = new DashboardOptions
+            {
+                DisplayStorageConnectionString = true,
+                Authorization = env.IsDevelopment() ? new IDashboardAuthorizationFilter[0] : 
+                    new IDashboardAuthorizationFilter[] { new HangfireAuthorizationFilter() }
+            };
 
-            app.UseHttpsRedirection();
+            app.UseHangfireDashboard("/hangfire", hangfireOptions);
+
             app.UseMvc();
         }
 
-        private void UserManagementAndAuth(IServiceCollection services)
+        private static void EventsConfigurations(IServiceCollection services)
+        {
+            services.AddTransient<IEventsManager, EventsManager>();
+            services.AddTransient<IEventHandlerFactory, EventHandlerFactory>();
+            services.AddTransient<IEventHandlerManager, EventHandlerManager>();
+            services.AddTransient<IEventHandler<UserRegisteredEvent>, UserRegisteredEventHandler>();
+            services.AddTransient<INotificationService, NotificationService>();
+        }
+
+        private void DatabasesConfiguration(IServiceCollection services)
+        {
+            services.AddDbContext<ApplicationDbContext>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("Mssql"));
+            });
+
+            services.Configure<RedisOptions>(options =>
+            {
+                options.ConnectionString = Configuration.GetConnectionString("Redis");
+            });
+
+            services.AddTransient<DbContext, ApplicationDbContext>();
+            services.AddTransient<RedisDbContext, RedisDbContext>();
+        }
+
+        private void UserManagementAndAuthConfigurations(IServiceCollection services)
         {
             services.Configure<IdentityOptions>(options =>
             {

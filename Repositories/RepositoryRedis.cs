@@ -32,27 +32,41 @@ namespace Repositories
             return JsonConvert.DeserializeObject<T>(redisValue.ToString());
         }
 
+#pragma warning disable 1998
         public async Task<IEnumerable<T>> GetAllAsync()
+#pragma warning restore 1998
         {
             throw new NotImplementedException();
         }
 
-        public async Task<PagedResult<T>> GetPagedAsync(int page, int pageSize, Expression<Func<T, bool>> filterPredicate = null, Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null, Func<IQueryable<T>, IIncludableQueryable<T, object>> include = null)
+#pragma warning disable 1998
+        public async Task<PagedResult<T>> GetPagedAsync(int page,
+#pragma warning restore 1998
+            int pageSize,
+            Expression<Func<T, bool>> filterPredicate = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
+            Func<IQueryable<T>, IIncludableQueryable<T, object>> include = null)
         {
             throw new NotImplementedException();
         }
 
+#pragma warning disable 1998
         public async Task<IEnumerable<T>> FindManyAsync(Expression<Func<T, bool>> predicate)
+#pragma warning restore 1998
         {
             throw new NotImplementedException();
         }
 
+#pragma warning disable 1998
         public async Task<int> CountAsync(Expression<Func<T, bool>> predicate)
+#pragma warning restore 1998
         {
             throw new NotImplementedException();
         }
 
+#pragma warning disable 1998
         public async Task<T> FindAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IIncludableQueryable<T, object>> include = null)
+#pragma warning restore 1998
         {
             throw new NotImplementedException();
         }

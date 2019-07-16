@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
-using MimeKit;
 
-namespace Infrastructure
+namespace Infrastructure.SmtpMailing
 {
     public interface IMailSenderService
     {

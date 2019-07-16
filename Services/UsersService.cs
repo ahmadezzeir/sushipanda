@@ -2,9 +2,9 @@
 using Autofac;
 using AutoMapper;
 using Domain.Models;
-using Emails;
-using Emails.ViewModels;
-using Infrastructure;
+using Infrastructure.EventHandling;
+using Infrastructure.EventHandling.Interfaces;
+using Infrastructure.Events.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Internal;
@@ -18,17 +18,14 @@ namespace Services
     {
         private readonly UserManager<User> _userManager;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IMailSenderService _mailSenderService;
-        private readonly IRazorViewToStringRenderer _razorViewToStringRenderer;
+        private readonly IEventsManager _eventsManager;
 
         public UsersService(IMapper mapper, IComponentContext scope, UserManager<User> userManager,
-            IHttpContextAccessor httpContextAccessor, IMailSenderService mailSenderService, 
-            IRazorViewToStringRenderer razorViewToStringRenderer) : base(mapper, scope)
+            IHttpContextAccessor httpContextAccessor, IEventsManager eventsManager) : base(mapper, scope)
         {
             _userManager = userManager;
             _httpContextAccessor = httpContextAccessor;
-            _mailSenderService = mailSenderService;
-            _razorViewToStringRenderer = razorViewToStringRenderer;
+            _eventsManager = eventsManager;
         }
 
         public async Task<IdentityResult> CreateUserAsync(UserCreationDto userCreationDto)
@@ -38,20 +35,13 @@ namespace Services
 
             if (!identityResult.Errors.Any())
             {
-                var emailView = new ConfirmMailboxEmailViewModel
+                _eventsManager.EnqueueEvent(new UserRegisteredEvent
                 {
-                    Token = await _userManager.GenerateEmailConfirmationTokenAsync(user),
                     Username = user.Name,
-                    Password = userCreationDto.Password
-                };
-                var message = new MailMessage
-                {
-                    BodyHtml = await _razorViewToStringRenderer.RenderViewToStringAsync("ConfirmMailboxEmailView", emailView),
-                    From = "admin@example.com",
-                    To = user.Email,
-                    Subject = "Thank you for your registration"
-                };
-                await _mailSenderService.SendEmailAsync(message);
+                    Email = user.Email,
+                    Password = userCreationDto.Password,
+                    Token = await _userManager.GenerateEmailConfirmationTokenAsync(user)
+                });
             }
 
             return identityResult;
@@ -63,7 +53,7 @@ namespace Services
 
             if (user != null)
             {
-                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                await _userManager.GeneratePasswordResetTokenAsync(user);
             }
         }
 
@@ -72,14 +62,14 @@ namespace Services
             var a = _httpContextAccessor.HttpContext.User;
             var user = await _userManager.GetUserAsync(a);
             var token = await _userManager.GenerateChangeEmailTokenAsync(user, dto.NewEmail);
-            await _userManager.ChangeEmailAsync(user, dto.NewEmail, token);
+            await _userManager.ChangeEmailAsync(user, dto.NewEmail, token); 
         }
 
         public async Task ConfirmEmailAsync(string token)
         {
             var claimsPrincipal = _httpContextAccessor.HttpContext.User;
             var user = await _userManager.GetUserAsync(claimsPrincipal);
-            var res = await _userManager.ConfirmEmailAsync(user, token);
+            await _userManager.ConfirmEmailAsync(user, token);
         }
     }
-}
+}   

@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 using MimeKit;
 using MimeKit.Text;
 
-namespace Infrastructure
+namespace Infrastructure.SmtpMailing
 {
     public class MailSenderService : IMailSenderService
     {

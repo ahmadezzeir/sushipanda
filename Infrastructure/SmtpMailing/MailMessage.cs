@@ -1,4 +1,4 @@
-﻿namespace Infrastructure
+﻿namespace Infrastructure.SmtpMailing
 {
     public class MailMessage
     {
