@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Infrastructure.Events.Models
+namespace Services.Events.Models
 {
     public class EventBase
     {

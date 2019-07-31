@@ -12,8 +12,9 @@
     <PackageReference Include="Google.Apis.Oauth2.v2" Version="1.40.2.1602" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3" />
-    <PackageReference Include="NSwag.AspNetCore" Version="13.0.3" />
+    <PackageReference Include="NSwag.AspNetCore" Version="13.0.4" />
     <PackageReference Include="Sentry.AspNetCore" Version="1.2.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.5.0" />
     <PackageReference Include="Hangfire.Core" Version="1.7.4" />

@@ -22,7 +22,7 @@ namespace Repositories.Interfaces
 
         Task<IEnumerable<TModel>> FindManyAsync(Expression<Func<TModel, bool>> predicate);
 
-        Task<int> CountAsync(Expression<Func<TModel, bool>> predicate);
+        Task<int> CountAsync(Expression<Func<TModel, bool>> predicate = null);
 
         Task<TModel> FindAsync(Expression<Func<TModel, bool>> predicate, Func<IQueryable<TModel>, IIncludableQueryable<TModel, object>> include = null);
 

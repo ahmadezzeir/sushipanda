@@ -1,4 +1,4 @@
-﻿namespace Infrastructure.Events.Models
+﻿namespace Services.Events.Models
 {
     public class UserRegisteredEvent : EventBase
     {

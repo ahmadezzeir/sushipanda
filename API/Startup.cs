@@ -13,11 +13,7 @@ using FluentValidation.AspNetCore;
 using Hangfire;
 using Hangfire.Dashboard;
 using Hangfire.SqlServer;
-using Infrastructure;
-using Infrastructure.EventHandling;
-using Infrastructure.EventHandling.Interfaces;
-using Infrastructure.Events;
-using Infrastructure.Events.Models;
+using Infrastructure.Hubs;
 using Infrastructure.Notifications;
 using Infrastructure.SmtpMailing;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -35,6 +31,10 @@ using Persistence;
 using Repositories;
 using Repositories.Interfaces;
 using Services;
+using Services.Events;
+using Services.Events.EventHandling;
+using Services.Events.EventHandling.Interfaces;
+using Services.Events.Models;
 using Services.Identity;
 using Services.Interfaces;
 using Services.MappingProfiles;
@@ -86,54 +86,31 @@ namespace API
                 {
                     CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
                     SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
-                    QueuePollInterval = TimeSpan.Zero,
+                    QueuePollInterval = TimeSpan.FromMinutes(5),  // Change to TimeSpan.FromMinutes(5) while debugging not hangfire
                     UseRecommendedIsolationLevel = true,
                     UsePageLocksOnDequeue = true,
                     DisableGlobalLocks = true
                 }));
             services.AddHangfireServer();
 
-            services.AddCors();
+            services.AddCors(o => o.AddPolicy("CorsPolicy", builder => {
+                builder
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials()
+                    .WithOrigins("http://localhost:3000");
+            }));
+
+            services.AddSignalR();
+
             services.AddMvc(options =>
-                {
-                    options.Filters.Add(typeof(ExceptionFilter));
-                })
-                .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<UserDtoValidator>())
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            {
+                options.Filters.Add(typeof(ExceptionFilter));
+            })
+            .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<UserDtoValidator>())
+            .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             return ConfigureAutofac(services);
-        }
-
-        private static void ProjectServicesConfiguration(IServiceCollection services)
-        {
-            services.AddTransient<IUsersService, UsersService>();
-            services.AddTransient<IAuthService, AuthService>();
-            services.AddTransient<IRefreshTokenService, RefreshTokenService>();
-
-            services.AddTransient<IDishesService, DishesService>();
-        }
-
-        private void MailingConfiguration(IServiceCollection services)
-        {
-            services.AddTransient<IMailSenderService, MailSenderService>();
-            services.Configure<SmtpConfiguration>(Configuration.GetSection("Smtp"));
-            services.AddSingleton<SmtpConfiguration>();
-            services.AddTransient<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
-        }
-
-        public IServiceProvider ConfigureAutofac(IServiceCollection services)
-        {
-            var builder = new ContainerBuilder();
-            builder.Populate(services);
-
-            builder.RegisterGeneric(typeof(RepositorySql<>)).Named("sql", typeof(IRepository<>)).InstancePerDependency();
-            builder.RegisterGeneric(typeof(RepositoryRedis<>)).Named("redis", typeof(IRepository<>)).InstancePerDependency();
-
-            builder.RegisterType<UnitOfWorkSql>().Keyed<IUnitOfWork>("sql").InstancePerDependency();
-            builder.RegisterType<UnitOfWorkRedis>().Keyed<IUnitOfWork>("redis").InstancePerDependency();
-
-            var container = builder.Build();
-            return container.Resolve<IServiceProvider>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -148,7 +125,7 @@ namespace API
             }
 
             app.UseHttpsRedirection();
-            app.UseCors(options => options.WithOrigins("http://localhost:3000").AllowAnyMethod().AllowAnyHeader());
+            app.UseCors("CorsPolicy");
 
             app.UseAuthentication();
 
@@ -158,13 +135,51 @@ namespace API
             var hangfireOptions = new DashboardOptions
             {
                 DisplayStorageConnectionString = true,
-                Authorization = env.IsDevelopment() ? new IDashboardAuthorizationFilter[0] : 
+                Authorization = env.IsDevelopment() ? new IDashboardAuthorizationFilter[0] :
                     new IDashboardAuthorizationFilter[] { new HangfireAuthorizationFilter() }
             };
 
             app.UseHangfireDashboard("/hangfire", hangfireOptions);
 
+            app.UseSignalR(route =>
+            {
+                route.MapHub<NotificationHub>("/hub");
+            });
+
             app.UseMvc();
+        }
+
+        private static void ProjectServicesConfiguration(IServiceCollection services)
+        {
+            services.AddTransient<IUsersService, UsersService>();
+            services.AddTransient<IAuthService, AuthService>();
+            services.AddTransient<IRefreshTokenService, RefreshTokenService>();
+
+            services.AddTransient<IDishesService, DishesService>();
+            services.AddTransient<IOrdersService, OrdersService>();
+        }
+
+        private void MailingConfiguration(IServiceCollection services)
+        {
+            services.AddTransient<IMailSenderService, MailSenderService>();
+            services.Configure<SmtpConfiguration>(Configuration.GetSection("Smtp"));
+            services.AddSingleton<SmtpConfiguration>();
+            services.AddTransient<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
+        }
+
+        private IServiceProvider ConfigureAutofac(IServiceCollection services)
+        {
+            var builder = new ContainerBuilder();
+            builder.Populate(services);
+
+            builder.RegisterGeneric(typeof(RepositorySql<>)).Named("sql", typeof(IRepository<>)).InstancePerDependency();
+            builder.RegisterGeneric(typeof(RepositoryRedis<>)).Named("redis", typeof(IRepository<>)).InstancePerDependency();
+
+            builder.RegisterType<UnitOfWorkSql>().Keyed<IUnitOfWork>("sql").InstancePerDependency();
+            builder.RegisterType<UnitOfWorkRedis>().Keyed<IUnitOfWork>("redis").InstancePerDependency();
+
+            var container = builder.Build();
+            return container.Resolve<IServiceProvider>();
         }
 
         private static void EventsConfigurations(IServiceCollection services)
@@ -173,6 +188,7 @@ namespace API
             services.AddTransient<IEventHandlerFactory, EventHandlerFactory>();
             services.AddTransient<IEventHandlerManager, EventHandlerManager>();
             services.AddTransient<IEventHandler<UserRegisteredEvent>, UserRegisteredEventHandler>();
+            services.AddTransient<IEventHandler<OrderCreatedEvent>, OrderCreatedEventHandler>();
             services.AddTransient<INotificationService, NotificationService>();
         }
 

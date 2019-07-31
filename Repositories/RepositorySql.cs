@@ -80,9 +80,10 @@ namespace Repositories
             return await query.SingleOrDefaultAsync(predicate);
         }
 
-        public async Task<int> CountAsync(Expression<Func<TModel, bool>> predicate)
+        public async Task<int> CountAsync(Expression<Func<TModel, bool>> predicate = null)
         {
-            return await _dbSet.CountAsync(predicate);
+            var count = predicate == null ? await _dbSet.CountAsync() : await _dbSet.CountAsync(predicate);
+            return count;
         }
 
         public async Task<TModel> FindFirstAsync(Expression<Func<TModel, bool>> predicate)

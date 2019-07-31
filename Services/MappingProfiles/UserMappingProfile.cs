@@ -15,7 +15,6 @@ namespace Services.MappingProfiles
             CreateMap<User, LoggedInUserDto>()
                 .ForMember(x => x.Roles, 
                     opt => opt.MapFrom(x => x.UserRoles.Select(ur => ur.Role.Name)));
-
         }
     }
 }

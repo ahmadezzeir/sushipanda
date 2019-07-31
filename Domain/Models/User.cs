@@ -16,6 +16,6 @@ namespace Domain.Models
 
         public bool EmailConfirmed { get; set; }
 
-        public ICollection<UserRole> UserRoles { get; set; }
+        public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
     }
 }

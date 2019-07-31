@@ -1,8 +1,8 @@
 ﻿using System.Threading.Tasks;
-using Infrastructure.EventHandling.Interfaces;
-using Infrastructure.Events.Models;
+using Services.Events.EventHandling.Interfaces;
+using Services.Events.Models;
 
-namespace Infrastructure.EventHandling
+namespace Services.Events.EventHandling
 {
     public class EventHandlerManager : IEventHandlerManager
     {

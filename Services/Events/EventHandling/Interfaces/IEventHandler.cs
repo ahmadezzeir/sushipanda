@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
-using Infrastructure.Events.Models;
+using Services.Events.Models;
 
-namespace Infrastructure.EventHandling.Interfaces
+namespace Services.Events.EventHandling.Interfaces
 {
     public interface IEventHandler<in TEvent> where TEvent : EventBase
     {

@@ -1,9 +1,9 @@
 ﻿using System.Threading.Tasks;
-using Infrastructure.EventHandling.Interfaces;
-using Infrastructure.Events.Models;
 using Infrastructure.Notifications;
+using Services.Events.EventHandling.Interfaces;
+using Services.Events.Models;
 
-namespace Infrastructure.Events
+namespace Services.Events
 {
     public class UserRegisteredEventHandler : IEventHandler<UserRegisteredEvent>
     {

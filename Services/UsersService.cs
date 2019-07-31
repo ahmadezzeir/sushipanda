@@ -2,14 +2,13 @@
 using Autofac;
 using AutoMapper;
 using Domain.Models;
-using Infrastructure.EventHandling;
-using Infrastructure.EventHandling.Interfaces;
-using Infrastructure.Events.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Internal;
 using Services.Abstractions;
 using Services.Dtos;
+using Services.Events.EventHandling.Interfaces;
+using Services.Events.Models;
 using Services.Interfaces;
 
 namespace Services
