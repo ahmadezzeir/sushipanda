@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Text;
 using API.Filter;
@@ -13,6 +14,8 @@ using FluentValidation.AspNetCore;
 using Hangfire;
 using Hangfire.Dashboard;
 using Hangfire.SqlServer;
+using Infrastructure.Files;
+using Infrastructure.FileSystem;
 using Infrastructure.Hubs;
 using Infrastructure.Notifications;
 using Infrastructure.SmtpMailing;
@@ -24,6 +27,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using NSwag;
 using NSwag.Generation.Processors.Security;
@@ -124,6 +128,19 @@ namespace API
                 app.UseHsts();
             }
 
+            var cachePeriod = env.IsDevelopment() ? "600" : "604800";
+            if (!Directory.Exists(Path.Combine(Configuration["FileStorageFolderUrl"], "files")))
+            {
+                Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "files"));
+            }
+
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(Directory.GetCurrentDirectory(), "files")),
+                RequestPath = "/files"
+            });
+
             app.UseHttpsRedirection();
             app.UseCors("CorsPolicy");
 
@@ -157,6 +174,9 @@ namespace API
 
             services.AddTransient<IDishesService, DishesService>();
             services.AddTransient<IOrdersService, OrdersService>();
+
+            services.AddTransient<IFileSystemService, FileSystemSystemService>();
+            services.AddTransient<IFileService, FileService>();
         }
 
         private void MailingConfiguration(IServiceCollection services)

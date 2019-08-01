@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Domain.Models;
+using Microsoft.AspNetCore.Http;
 using Services.Dtos;
 
 namespace Services.MappingProfiles
