@@ -17,6 +17,8 @@
     <Compile Remove="Migrations\20190618123411_Initial.Designer.cs" />
     <Compile Remove="Migrations\20190618143236_Initial.cs" />
     <Compile Remove="Migrations\20190618143236_Initial.Designer.cs" />
+    <Compile Remove="Migrations\20190805081455_DishModelChanged.cs" />
+    <Compile Remove="Migrations\20190805081455_DishModelChanged.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

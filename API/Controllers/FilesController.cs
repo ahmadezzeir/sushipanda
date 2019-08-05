@@ -20,8 +20,13 @@ namespace API.Controllers
         [HttpPost]
         public async Task<IActionResult> Post(IFormFile formFile)
         {
-            var result = await _fileService.SaveFileAsync(formFile);
-            return Ok(result);
+            var (id, name) = await _fileService.SaveFileAsync(formFile);
+
+            return Ok(new
+            {
+                Id = id,
+                Name = name
+            });
         }
     }
 }

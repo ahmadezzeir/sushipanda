@@ -25,5 +25,14 @@ namespace Services
             var dishes = await _dishesRepository.GetAllAsync();
             return Mapper.Map<IEnumerable<DishDto>>(dishes);
         }
+
+        public async Task<Guid> CreateDish(DishCreationDto dishCreationDto)
+        {
+            var dish = Mapper.Map<Dish>(dishCreationDto);
+            await _dishesRepository.AddAsync(dish);
+            await UnitOfWork.CommitAsync();
+
+            return dish.Id;
+        }
     }
 }

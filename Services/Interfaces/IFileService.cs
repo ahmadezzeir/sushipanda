@@ -6,6 +6,6 @@ namespace Services.Interfaces
 {
     public interface IFileService
     {
-        Task<Guid> SaveFileAsync(IFormFile formFile);
+        Task<(Guid id, string name)> SaveFileAsync(IFormFile formFile);
     }
 }

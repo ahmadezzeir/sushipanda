@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Domain.Models
 {
@@ -6,10 +7,18 @@ namespace Domain.Models
     {
         public string Name { get; set; }
 
-        public double Calories { get; set; }
+        public string Description { get; set; }
 
-        public double Weight { get; set; }
+        public int Calories { get; set; }
 
-        public ICollection<OrderDish> Orders { get; set; } = new List<OrderDish>();
+        public int Weight { get; set; }
+
+        public decimal Price { get; set; }
+
+        public virtual File File { get; set; }
+
+        public Guid FileId { get; set; }
+
+        public virtual ICollection<OrderDish> Orders { get; set; } = new List<OrderDish>();
     }
 }

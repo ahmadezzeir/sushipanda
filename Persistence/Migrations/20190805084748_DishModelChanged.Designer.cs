@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Persistence;
 
 namespace Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190805084748_DishModelChanged")]
+    partial class DishModelChanged
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,16 +40,12 @@ namespace Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FileId")
-                        .IsUnique();
-
                     b.ToTable("Dish");
                 });
 
             modelBuilder.Entity("Domain.Models.File", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd();
+                    b.Property<Guid>("Id");
 
                     b.Property<string>("Caption")
                         .IsRequired();
@@ -143,11 +141,11 @@ namespace Persistence.Migrations
                     b.ToTable("Role");
                 });
 
-            modelBuilder.Entity("Domain.Models.Dish", b =>
+            modelBuilder.Entity("Domain.Models.File", b =>
                 {
-                    b.HasOne("Domain.Models.File", "File")
-                        .WithOne("Dish")
-                        .HasForeignKey("Domain.Models.Dish", "FileId")
+                    b.HasOne("Domain.Models.Dish", "Dish")
+                        .WithOne("File")
+                        .HasForeignKey("Domain.Models.File", "Id")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

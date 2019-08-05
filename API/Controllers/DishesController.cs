@@ -1,5 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System.Net;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Services.Dtos;
 using Services.Interfaces;
 
 namespace API.Controllers
@@ -20,6 +22,13 @@ namespace API.Controllers
         {
             var results = await _dishesService.GetAllDishesAsync();
             return Ok(results);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Post(DishCreationDto dishCreationDto)
+        {
+            var result = await _dishesService.CreateDish(dishCreationDto);
+            return Ok(result);
         }
     }
 }

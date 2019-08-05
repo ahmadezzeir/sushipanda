@@ -19,7 +19,7 @@ namespace Services
             _fileSystemService = fileSystemService;
         }
 
-        public async Task<Guid> SaveFileAsync(IFormFile formFile)
+        public async Task<(Guid id, string name)> SaveFileAsync(IFormFile formFile)
         {
             var name = await _fileSystemService.SaveFile(formFile);
 
@@ -33,7 +33,7 @@ namespace Services
             await repository.AddAsync(file);
             await UnitOfWork.CommitAsync();
 
-            return file.Id;
+            return (file.Id, file.Name);
         }
     }
 }

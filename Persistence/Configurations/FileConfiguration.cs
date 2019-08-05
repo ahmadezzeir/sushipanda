@@ -10,6 +10,9 @@ namespace Persistence.Configurations
         {
             builder.Property(x => x.Caption).IsRequired();
             builder.Property(x => x.Name).IsRequired();
+
+            builder.HasOne(x => x.Dish)
+                .WithOne(x => x.File);
         }
     }
 }

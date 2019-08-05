@@ -6,6 +6,6 @@
 
         public string Name { get; set; }
 
-        public Dish Dish { get; set; }
+        public virtual Dish Dish { get; set; }
     }
 }
