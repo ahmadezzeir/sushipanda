@@ -33,9 +33,16 @@ namespace Repositories
             return await query.FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<IEnumerable<TModel>> GetAllAsync()
+        public async Task<IEnumerable<TModel>> GetAllAsync(Func<IQueryable<TModel>, IIncludableQueryable<TModel, object>> include = null)
         {
-            return await _dbSet.AsNoTracking().ToListAsync();
+            IQueryable<TModel> query = _dbSet;
+
+            if (include != null)
+            {
+                query = include(query);
+            }
+
+            return await query.AsNoTracking().ToListAsync();
         }
 
         public async Task<PagedResult<TModel>> GetPagedAsync(int page, int pageSize,

@@ -13,7 +13,7 @@ namespace Repositories.Interfaces
     {
         Task<TModel> GetByIdAsync(Guid id, Func<IQueryable<TModel>, IIncludableQueryable<TModel, object>> include = null);
 
-        Task<IEnumerable<TModel>> GetAllAsync();
+        Task<IEnumerable<TModel>> GetAllAsync(Func<IQueryable<TModel>, IIncludableQueryable<TModel, object>> include = null);
 
         Task<PagedResult<TModel>> GetPagedAsync(int page, int pageSize,
             Expression<Func<TModel, bool>> filterPredicate = null,

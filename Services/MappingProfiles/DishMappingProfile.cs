@@ -9,6 +9,8 @@ namespace Services.MappingProfiles
         public DishMappingProfile()
         {
             CreateMap<Dish, DishDto>()
+                .ForMember(dest => dest.ImgId, opt => opt.MapFrom(x => x.File.Id))
+                .ForMember(dest => dest.ImgPath, opt => opt.MapFrom(x => x.File.Name))
                 .ReverseMap();
 
             CreateMap<DishCreationDto, Dish>()

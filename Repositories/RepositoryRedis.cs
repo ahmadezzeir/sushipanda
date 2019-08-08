@@ -33,7 +33,7 @@ namespace Repositories
         }
 
 #pragma warning disable 1998
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public async Task<IEnumerable<T>> GetAllAsync(Func<IQueryable<T>, IIncludableQueryable<T, object>> include = null)
 #pragma warning restore 1998
         {
             throw new NotImplementedException();
