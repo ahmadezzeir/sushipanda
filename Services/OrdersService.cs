@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Autofac;
 using AutoMapper;
 using Domain.Models;
@@ -41,7 +42,7 @@ namespace Services
 
         public async Task<int> GetOrdersCount()
         {
-            return await _ordersRepository.CountAsync();
+            return await _ordersRepository.CountAsync(x => x.CreatedDate.Date == DateTime.Now.Date);
         }
     }
 }

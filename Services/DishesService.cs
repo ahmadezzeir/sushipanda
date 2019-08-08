@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
 using AutoMapper;
 using Domain.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using Repositories.Interfaces;
 using Services.Abstractions;
 using Services.Dtos;
@@ -23,8 +25,13 @@ namespace Services
 
         public async Task<IEnumerable<DishDto>> GetAllDishesAsync()
         {
-            var dishes = await _dishesRepository.GetAllAsync(x => x.Include(d => d.File));
-            return Mapper.Map<IEnumerable<DishDto>>(dishes);
+            Func<IQueryable<Dish>, IOrderedQueryable<Dish>> orderBy = queryable =>
+                queryable.OrderByDescending(d => d.Orders.Count).ThenByDescending(d => d.Name);
+            Func<IQueryable<Dish>, IIncludableQueryable<Dish, object>> include = queryable =>
+                queryable.Include(d => d.File).Include(d => d.Orders);
+            var dishes = await _dishesRepository.GetPagedAsync(1, 8,
+                null, orderBy, include);
+            return Mapper.Map<IEnumerable<DishDto>>(dishes.Results);
         }
 
         public async Task<Guid> CreateDish(DishCreationDto dishCreationDto)
