@@ -11,5 +11,7 @@ namespace Infrastructure.FileSystem
         Task<string> SaveFile(IFormFile file);
 
         Task<byte[]> GetFile(string path, string fileName);
+
+        Task MoveFileAsync(string fileName, string folder);
     }
 }

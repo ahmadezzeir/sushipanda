@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Autofac;
 using AutoMapper;
 using Domain.Models;
+using Infrastructure.FileSystem;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using Repositories.Interfaces;
@@ -17,10 +18,16 @@ namespace Services
     public class DishesService : ServiceBaseSql, IDishesService
     {
         private readonly IRepository<Dish> _dishesRepository;
+        private readonly IRepository<File> _filesRepository;
 
-        public DishesService(IMapper mapper, IComponentContext scope) : base(mapper, scope)
+        private readonly IFileSystemService _fileSystemService;
+
+        public DishesService(IMapper mapper, IComponentContext scope, IFileSystemService fileSystemService) : base(mapper, scope)
         {
             _dishesRepository = UnitOfWork.Repository<Dish>();
+            _filesRepository = UnitOfWork.Repository<File>();
+
+            _fileSystemService = fileSystemService;
         }
 
         public async Task<IEnumerable<DishDto>> GetAllDishesAsync()
@@ -39,6 +46,9 @@ namespace Services
             var dish = Mapper.Map<Dish>(dishCreationDto);
             await _dishesRepository.AddAsync(dish);
             await UnitOfWork.CommitAsync();
+
+            var file = await _filesRepository.GetByIdAsync(dish.FileId);
+            await _fileSystemService.MoveFileAsync(file.Name, "dishes");
 
             return dish.Id;
         }
